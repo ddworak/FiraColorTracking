@@ -19,12 +19,7 @@ public class ColorBlobDetector {
     private static final double sMinContourArea = 0.1;
     // Color radius for range checking in HSV color space
     private static final Scalar sColorRadius = new Scalar(25, 50, 50, 0);
-    private static final Comparator<Pair<Double, MatOfPoint>> sByContourSizeComparator = new Comparator<Pair<Double, MatOfPoint>>() {
-        @Override
-        public int compare(Pair<Double, MatOfPoint> lhs, Pair<Double, MatOfPoint> rhs) {
-            return Double.compare(lhs.first, rhs.first);
-        }
-    };
+    private static final Comparator<Pair<Double, MatOfPoint>> sByContourSizeComparator = (lhs, rhs) -> Double.compare(lhs.first, rhs.first);
     // Lower and Upper bounds for range checking in HSV color space
     private final Scalar mLowerBound = new Scalar(0);
     private final Scalar mUpperBound = new Scalar(0);

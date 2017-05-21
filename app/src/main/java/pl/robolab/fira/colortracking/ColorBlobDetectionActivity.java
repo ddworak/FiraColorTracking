@@ -168,7 +168,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
 
         if (mIsColorSelected) {
             mDetector.process(mRgba);
-            List<MatOfPoint> contours = mDetector.getContours();
+            List<MatOfPoint> contours = mDetector.getHull();
             Log.e(TAG, "Contours count: " + contours.size());
             Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);
 

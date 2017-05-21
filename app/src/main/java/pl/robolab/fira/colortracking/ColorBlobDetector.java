@@ -1,11 +1,14 @@
 package pl.robolab.fira.colortracking;
 
+import android.util.Log;
 import android.util.Pair;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -24,7 +27,7 @@ public class ColorBlobDetector {
     private final Scalar mLowerBound = new Scalar(0);
     private final Scalar mUpperBound = new Scalar(0);
     private final Mat mSpectrum = new Mat();
-    private final List<MatOfPoint> mContours = new ArrayList<>();
+    private final List<MatOfPoint> mHull = new ArrayList<>();
 
     // Cache
     private final Mat mPyrDownMat = new Mat();
@@ -73,29 +76,41 @@ public class ColorBlobDetector {
         Core.inRange(mHsvMat, mLowerBound, mUpperBound, mMask);
         Imgproc.dilate(mMask, mDilatedMask, new Mat());
 
-        ArrayList<MatOfPoint> contours = new ArrayList<>();
+        ArrayList<MatOfPoint> allContours = new ArrayList<>();
 
-        Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(mDilatedMask, allContours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         ArrayList<Pair<Double, MatOfPoint>> sizedContours = new ArrayList<>();
-        for (MatOfPoint contour : contours) {
+        for (MatOfPoint contour : allContours) {
             sizedContours.add(Pair.create(Imgproc.contourArea(contour), contour));
         }
         Collections.sort(sizedContours, sByContourSizeComparator);
-        mContours.clear();
+        mHull.clear();
         if (!sizedContours.isEmpty()) {
             final double maxArea = sizedContours.get(0).first;
+            MatOfPoint hullPointMat = new MatOfPoint();
+            MatOfInt hull = new MatOfInt();
 
-            // Filter contours by area and resize to fit the original image size
+            // Filter contours by area and resize to fit the original image size, calculating convex hull
             for (int i = 0; i < sizedContours.size() && sizedContours.get(i).first > sMinContourArea * maxArea; i++) {
                 MatOfPoint contour = sizedContours.get(i).second;
                 Core.multiply(contour, new Scalar(4, 4), contour);
-                mContours.add(contour);
+                Imgproc.convexHull(contour, hull);
+                List<Point> hullPointList = new ArrayList<>();
+                List<Point> contourPoints = contour.toList();
+                List<Integer> hullIndices = hull.toList();
+                for (int j = 0; j < hullIndices.size(); j++) {
+                    hullPointList.add(contourPoints.get(hullIndices.get(j)));
+                }
+                hullPointMat.fromList(hullPointList);
             }
+            Log.e("lol", "" + hullPointMat.size().toString());
+            mHull.clear();
+            mHull.add(hullPointMat);
         }
     }
 
-    public List<MatOfPoint> getContours() {
-        return mContours;
+    public List<MatOfPoint> getHull() {
+        return mHull;
     }
 }

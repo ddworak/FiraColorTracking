@@ -19,6 +19,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -169,12 +170,20 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         if (mIsColorSelected) {
             mDetector.process(mRgba);
             List<MatOfPoint> contours = mDetector.getHull();
-            Log.e(TAG, "Contours count: " + contours.size());
             Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);
-
+            if (!contours.isEmpty()) {
+                double x = 0;
+                double y = 0;
+                List<Point> points = contours.get(0).toList();
+                for (Point point : points) {
+                    x += point.x;
+                    y += point.y;
+                }
+                Point center = new Point(x / points.size(), y / points.size());
+                Imgproc.circle(mRgba, center, 10, CONTOUR_COLOR, Core.FILLED);
+            }
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
             colorLabel.setTo(mBlobColorRgba);
-
             Mat spectrumLabel = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
             mSpectrum.copyTo(spectrumLabel);
         }

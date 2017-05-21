@@ -1,5 +1,7 @@
 package pl.robolab.fira.colortracking;
 
+import android.util.Pair;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -8,7 +10,8 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ColorBlobDetector {
@@ -16,6 +19,12 @@ public class ColorBlobDetector {
     private static final double sMinContourArea = 0.1;
     // Color radius for range checking in HSV color space
     private static final Scalar sColorRadius = new Scalar(25, 50, 50, 0);
+    private static final Comparator<Pair<Double, MatOfPoint>> sByContourSizeComparator = new Comparator<Pair<Double, MatOfPoint>>() {
+        @Override
+        public int compare(Pair<Double, MatOfPoint> lhs, Pair<Double, MatOfPoint> rhs) {
+            return Double.compare(lhs.first, rhs.first);
+        }
+    };
     // Lower and Upper bounds for range checking in HSV color space
     private final Scalar mLowerBound = new Scalar(0);
     private final Scalar mUpperBound = new Scalar(0);
@@ -69,26 +78,22 @@ public class ColorBlobDetector {
         Core.inRange(mHsvMat, mLowerBound, mUpperBound, mMask);
         Imgproc.dilate(mMask, mDilatedMask, new Mat());
 
-        List<MatOfPoint> contours = new ArrayList<>();
+        ArrayList<MatOfPoint> contours = new ArrayList<>();
 
         Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        // Find max contour area
-        double maxArea = 0;
-        Iterator<MatOfPoint> each = contours.iterator();
-        while (each.hasNext()) {
-            MatOfPoint wrapper = each.next();
-            double area = Imgproc.contourArea(wrapper);
-            if (area > maxArea)
-                maxArea = area;
+        ArrayList<Pair<Double, MatOfPoint>> sizedContours = new ArrayList<>();
+        for (MatOfPoint contour : contours) {
+            sizedContours.add(Pair.create(Imgproc.contourArea(contour), contour));
         }
-
-        // Filter contours by area and resize to fit the original image size
+        Collections.sort(sizedContours, sByContourSizeComparator);
         mContours.clear();
-        each = contours.iterator();
-        while (each.hasNext()) {
-            MatOfPoint contour = each.next();
-            if (Imgproc.contourArea(contour) > sMinContourArea * maxArea) {
+        if (!sizedContours.isEmpty()) {
+            final double maxArea = sizedContours.get(0).first;
+
+            // Filter contours by area and resize to fit the original image size
+            for (int i = 0; i < sizedContours.size() && sizedContours.get(i).first > sMinContourArea * maxArea; i++) {
+                MatOfPoint contour = sizedContours.get(i).second;
                 Core.multiply(contour, new Scalar(4, 4), contour);
                 mContours.add(contour);
             }

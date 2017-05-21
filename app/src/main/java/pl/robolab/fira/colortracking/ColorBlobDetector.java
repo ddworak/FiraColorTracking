@@ -12,39 +12,36 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ColorBlobDetector {
-    // Lower and Upper bounds for range checking in HSV color space
-    private Scalar mLowerBound = new Scalar(0);
-    private Scalar mUpperBound = new Scalar(0);
     // Minimum contour area in percent for contours filtering
-    private static double mMinContourArea = 0.1;
+    private static final double sMinContourArea = 0.1;
     // Color radius for range checking in HSV color space
-    private Scalar mColorRadius = new Scalar(25, 50, 50, 0);
-    private Mat mSpectrum = new Mat();
-    private List<MatOfPoint> mContours = new ArrayList<>();
+    private static final Scalar sColorRadius = new Scalar(25, 50, 50, 0);
+    // Lower and Upper bounds for range checking in HSV color space
+    private final Scalar mLowerBound = new Scalar(0);
+    private final Scalar mUpperBound = new Scalar(0);
+    private final Mat mSpectrum = new Mat();
+    private final List<MatOfPoint> mContours = new ArrayList<>();
 
     // Cache
-    private Mat mPyrDownMat = new Mat();
-    private Mat mHsvMat = new Mat();
-    private Mat mMask = new Mat();
-    private Mat mDilatedMask = new Mat();
-    private Mat mHierarchy = new Mat();
+    private final Mat mPyrDownMat = new Mat();
+    private final Mat mHsvMat = new Mat();
+    private final Mat mMask = new Mat();
+    private final Mat mDilatedMask = new Mat();
+    private final Mat mHierarchy = new Mat();
 
-    public void setColorRadius(Scalar radius) {
-        mColorRadius = radius;
-    }
 
     public void setHsvColor(Scalar hsvColor) {
-        double minH = (hsvColor.val[0] >= mColorRadius.val[0]) ? hsvColor.val[0] - mColorRadius.val[0] : 0;
-        double maxH = (hsvColor.val[0] + mColorRadius.val[0] <= 255) ? hsvColor.val[0] + mColorRadius.val[0] : 255;
+        double minH = (hsvColor.val[0] >= sColorRadius.val[0]) ? hsvColor.val[0] - sColorRadius.val[0] : 0;
+        double maxH = (hsvColor.val[0] + sColorRadius.val[0] <= 255) ? hsvColor.val[0] + sColorRadius.val[0] : 255;
 
         mLowerBound.val[0] = minH;
         mUpperBound.val[0] = maxH;
 
-        mLowerBound.val[1] = hsvColor.val[1] - mColorRadius.val[1];
-        mUpperBound.val[1] = hsvColor.val[1] + mColorRadius.val[1];
+        mLowerBound.val[1] = hsvColor.val[1] - sColorRadius.val[1];
+        mUpperBound.val[1] = hsvColor.val[1] + sColorRadius.val[1];
 
-        mLowerBound.val[2] = hsvColor.val[2] - mColorRadius.val[2];
-        mUpperBound.val[2] = hsvColor.val[2] + mColorRadius.val[2];
+        mLowerBound.val[2] = hsvColor.val[2] - sColorRadius.val[2];
+        mUpperBound.val[2] = hsvColor.val[2] + sColorRadius.val[2];
 
         mLowerBound.val[3] = 0;
         mUpperBound.val[3] = 255;
@@ -61,10 +58,6 @@ public class ColorBlobDetector {
 
     public Mat getSpectrum() {
         return mSpectrum;
-    }
-
-    public void setMinContourArea(double area) {
-        mMinContourArea = area;
     }
 
     public void process(Mat rgbaImage) {
@@ -95,7 +88,7 @@ public class ColorBlobDetector {
         each = contours.iterator();
         while (each.hasNext()) {
             MatOfPoint contour = each.next();
-            if (Imgproc.contourArea(contour) > mMinContourArea * maxArea) {
+            if (Imgproc.contourArea(contour) > sMinContourArea * maxArea) {
                 Core.multiply(contour, new Scalar(4, 4), contour);
                 mContours.add(contour);
             }

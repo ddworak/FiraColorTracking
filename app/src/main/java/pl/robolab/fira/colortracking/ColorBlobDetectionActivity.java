@@ -34,11 +34,11 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
     private Scalar mBlobColorHsv;
     private ColorBlobDetector mDetector;
     private Mat mSpectrum;
-    private Size SPECTRUM_SIZE;
-    private Scalar CONTOUR_COLOR;
+    private final Size SPECTRUM_SIZE = new Size(200, 64);
+    private final Scalar CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
 
     private CameraBridgeViewBase mOpenCvCameraView;
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+    private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
@@ -107,8 +107,6 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         mSpectrum = new Mat();
         mBlobColorRgba = new Scalar(255);
         mBlobColorHsv = new Scalar(255);
-        SPECTRUM_SIZE = new Size(200, 64);
-        CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
     }
 
     public void onCameraViewStopped() {
@@ -148,7 +146,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         for (int i = 0; i < mBlobColorHsv.val.length; i++)
             mBlobColorHsv.val[i] /= pointCount;
 
-        mBlobColorRgba = converScalarHsv2Rgba(mBlobColorHsv);
+        mBlobColorRgba = scalarHsv2Rgba(mBlobColorHsv);
 
         Log.i(TAG, "Touched rgba color: (" + mBlobColorRgba.val[0] + ", " + mBlobColorRgba.val[1] +
                 ", " + mBlobColorRgba.val[2] + ", " + mBlobColorRgba.val[3] + ")");
@@ -184,7 +182,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         return mRgba;
     }
 
-    private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
+    private Scalar scalarHsv2Rgba(Scalar hsvColor) {
         Mat pointMatRgba = new Mat();
         Mat pointMatHsv = new Mat(1, 1, CvType.CV_8UC3, hsvColor);
         Imgproc.cvtColor(pointMatHsv, pointMatRgba, Imgproc.COLOR_HSV2RGB_FULL, 4);

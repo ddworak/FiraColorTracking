@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class ColorBlobDetector {
+class ColorBlobDetector {
     // Minimum contour area in percent for contours filtering
     private static final double sMinContourArea = 0.1;
     // Color radius for range checking in HSV color space

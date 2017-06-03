@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">Fira Color Tracking</string>
+
+    <string name="btn_find">Find Device</string>
+    <string name="no_bluetooth">Bluetooth is not available</string>
+    <string name="bt_not_enabled_leaving">Bluetooth was not enabled. Exiting.</string>
+    <string name="unable_to_connect">Unable to connect to device</string>
+    <string name="connection_lost">Device connection was lost</string>
+    <string name="button_scan">Scan for devices</string>
+    <string name="none_paired">No devices have been paired</string>
+    <string name="scanning">Scanning for devices…</string>
+    <string name="none_found">No devices found</string>
+    <string name="select_device">Select a device to connect</string>
+    <string name="connect">Connect a device</string>
+    <string name="discoverable">Make discoverable</string>
+    <string name="connected_to">Connected to </string>
+    <string name="paired_devices">Paired devices</string>
+    <string name="other_devices">Other available devices</string>
 </resources>

@@ -16,8 +16,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
@@ -140,10 +138,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         Log.v("InitLog", "onCreate");
 
-        // Hide the window title.
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -212,8 +206,6 @@ public class MainActivity extends Activity implements SensorEventListener {
                 mCommandService.start();
             }
         }
-
-
     }
 
     private void setupCommand() {

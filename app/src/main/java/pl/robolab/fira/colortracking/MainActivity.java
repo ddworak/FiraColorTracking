@@ -16,11 +16,15 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.google.common.base.Optional;
+
+import org.opencv.core.Point;
+
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ColorBlobDetectionFragment.CenterBlobListener {
 
     // Message types sent from the BluetoothCommandService Handler
     public static final int MESSAGE_DEVICE_NAME = 3;
@@ -117,7 +121,6 @@ public class MainActivity extends Activity {
 
         Log.v("InitLog", "onCreate: bluetooth adapter != null");
         setContentView(R.layout.main);
-
     }
 
     @Override
@@ -141,6 +144,9 @@ public class MainActivity extends Activity {
             if (mCommandService == null)
                 setupCommand();
         }
+
+
+        ((ColorBlobDetectionFragment) getFragmentManager().findFragmentById(R.id.color_blob_fragment)).setCenterBlobListener(this);
     }
 
     @Override
@@ -255,6 +261,12 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    public void onCenterPoint(Optional<Point> center) {
+        for (Point p : center.asSet()) {
+            Log.v("CENTER", p.toString());
+        }
+    }
 
     private static class IncomingHandler extends Handler {
         private final WeakReference<MainActivity> mActivity;

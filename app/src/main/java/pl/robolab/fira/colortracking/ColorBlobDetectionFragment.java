@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
+import com.google.common.base.Optional;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -38,6 +40,7 @@ public class ColorBlobDetectionFragment extends Fragment implements OnTouchListe
     private Mat mSpectrum;
     private final Size SPECTRUM_SIZE = new Size(200, 64);
     private final Scalar CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
+    private CenterBlobListener centerBlobListener;
 
     private CameraBridgeViewBase mOpenCvCameraView;
     private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getActivity()) {
@@ -178,6 +181,9 @@ public class ColorBlobDetectionFragment extends Fragment implements OnTouchListe
                     y += point.y;
                 }
                 Point center = new Point(x / points.size(), y / points.size());
+                if (centerBlobListener != null) {
+                    centerBlobListener.onCenterPoint(points.isEmpty() ? Optional.absent() : Optional.of(center));
+                }
                 Imgproc.circle(mRgba, center, 10, CONTOUR_COLOR, Core.FILLED);
             }
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
@@ -195,5 +201,13 @@ public class ColorBlobDetectionFragment extends Fragment implements OnTouchListe
         Imgproc.cvtColor(pointMatHsv, pointMatRgba, Imgproc.COLOR_HSV2RGB_FULL, 4);
 
         return new Scalar(pointMatRgba.get(0, 0));
+    }
+
+    public void setCenterBlobListener(CenterBlobListener listener) {
+        centerBlobListener = listener;
+    }
+
+    interface CenterBlobListener {
+        void onCenterPoint(Optional<Point> center);
     }
 }

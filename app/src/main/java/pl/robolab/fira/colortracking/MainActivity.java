@@ -16,6 +16,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
@@ -138,6 +140,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         Log.v("InitLog", "onCreate");
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -155,13 +159,14 @@ public class MainActivity extends Activity implements SensorEventListener {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         senAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        setContentView(R.layout.main);
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
+        getActionBar().setDisplayShowTitleEnabled(false);
         Log.v("InitLog", "onStart");
 
         // If BT is not on, request that it be enabled.

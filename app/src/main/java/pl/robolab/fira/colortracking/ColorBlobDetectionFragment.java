@@ -1,13 +1,14 @@
 package pl.robolab.fira.colortracking;
 
-import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.ViewGroup;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -27,7 +28,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
-public class ColorBlobDetectionActivity extends Activity implements OnTouchListener, CvCameraViewListener2 {
+public class ColorBlobDetectionFragment extends Fragment implements OnTouchListener, CvCameraViewListener2 {
     private static final String TAG = "OCVSample::Activity";
     private boolean mIsColorSelected = false;
     private Mat mRgba;
@@ -39,14 +40,14 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
     private final Scalar CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
 
     private CameraBridgeViewBase mOpenCvCameraView;
-    private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+    private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(getActivity()) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCvCameraView.enableView();
-                    mOpenCvCameraView.setOnTouchListener(ColorBlobDetectionActivity.this);
+                    mOpenCvCameraView.setOnTouchListener(ColorBlobDetectionFragment.this);
                 }
                 break;
                 default: {
@@ -57,24 +58,21 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         }
     };
 
-    public ColorBlobDetectionActivity() {
+    public ColorBlobDetectionFragment() {
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
-    /**
-     * Called when the activity is first created.
-     */
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "called onCreate");
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.color_blob_detection_surface_view, container);
+    }
 
-        setContentView(R.layout.color_blob_detection_surface_view);
-
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.color_blob_detection_activity_surface_view);
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        mOpenCvCameraView = (CameraBridgeViewBase) getView().findViewById(R.id.color_blob_detection_activity_surface_view);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -89,7 +87,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, getActivity(), mLoaderCallback);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);

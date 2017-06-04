@@ -4,10 +4,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,7 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 
 
-public class MainActivity extends Activity implements SensorEventListener {
+public class MainActivity extends Activity {
 
     // Message types sent from the BluetoothCommandService Handler
     public static final int MESSAGE_DEVICE_NAME = 3;
@@ -37,59 +33,23 @@ public class MainActivity extends Activity implements SensorEventListener {
     private static final int REQUEST_ENABLE_BT = 2;
     // The Handler that gets information back from the BluetoothCommandService
     private final Handler mHandler = new IncomingHandler(this);
+    private Toast exitToast;
 
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
     // Member object for Bluetooth Command Service
     private BluetoothCommandService mCommandService = null;
 
-    // device sensor manager
-    private SensorManager mSensorManager;
-    private Sensor senAccelerometer;
-
-
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
-//
-//			key handlers
-//
-///////////////////////////////////////////////////////////////////////////////////   
-
-    public void onSensorChanged(SensorEvent event) {
-        Sensor mySensor = event.sensor;
-        if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
-            Log.v("AccLog", "x: " + x + " y: " + y + " z: " + z);
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            //
-            //	        place your code here
-            //
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////
-
-
-        }
-    }
-
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             sendSpeedCommand(0, 0);
+            if (exitToast.getView().isShown()) {
+                exitToast.cancel();
+                finish();
+            } else {
+                exitToast.show();
+            }
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             sendSpeedCommand(10, 20);
@@ -142,6 +102,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+        exitToast = Toast.makeText(this, R.string.press_again_exit, Toast.LENGTH_SHORT);
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -155,10 +116,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
 
         Log.v("InitLog", "onCreate: bluetooth adapter != null");
-
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        senAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         setContentView(R.layout.main);
 
     }
@@ -190,19 +147,12 @@ public class MainActivity extends Activity implements SensorEventListener {
     protected void onPause() {
         super.onPause();
         Log.v("InitLog", "onPause");
-        mSensorManager.unregisterListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.v("InitLog", "onResume");
-
-        // Performing this check in onResume() covers the case in which BT was
-        // not enabled during onStart(), so we were paused to enable it...
-        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-
-        mSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
         if (mCommandService != null) {
             if (mCommandService.getState() == BluetoothCommandService.STATE_NONE) {
@@ -283,10 +233,6 @@ public class MainActivity extends Activity implements SensorEventListener {
                 return true;
         }
         return false;
-    }
-
-    public void onAccuracyChanged(Sensor arg0, int arg1) {
-
     }
 
 

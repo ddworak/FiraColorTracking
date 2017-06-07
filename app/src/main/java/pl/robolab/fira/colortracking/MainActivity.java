@@ -261,13 +261,18 @@ public class MainActivity extends Activity implements ColorBlobDetectionFragment
         }
     }
 
+    public static int resolutionX = 1920;
+    public static int resolutionY = 768;
+
     @Override
     public void onCenterPoint(Optional<Point> center) {
         for (Point p : center.asSet()) {
             Log.v("CENTER", p.toString());
+            if (p.x < 0.4 * resolutionX) sendSpeedCommand(20, 40);
+            else if (p.x < 0.6 * resolutionX) sendSpeedCommand(30, 30);
+            else sendSpeedCommand(40, 20);
         }
     }
-
     private static class IncomingHandler extends Handler {
         private final WeakReference<MainActivity> mActivity;
 

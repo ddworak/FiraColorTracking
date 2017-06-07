@@ -182,9 +182,11 @@ public class ColorBlobDetectionFragment extends Fragment implements OnTouchListe
                 }
                 Point center = new Point(x / points.size(), y / points.size());
                 if (centerBlobListener != null) {
-                    centerBlobListener.onCenterPoint(points.isEmpty() ? Optional.absent() : Optional.of(center));
+                    centerBlobListener.onCenterPoint(Optional.of(center));
                 }
                 Imgproc.circle(mRgba, center, 10, CONTOUR_COLOR, Core.FILLED);
+            } else if (centerBlobListener != null) {
+                centerBlobListener.onCenterPoint(Optional.absent());
             }
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
             colorLabel.setTo(mBlobColorRgba);

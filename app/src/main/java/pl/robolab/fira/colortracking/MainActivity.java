@@ -43,6 +43,8 @@ public class MainActivity extends Activity implements ColorBlobDetectionFragment
     private BluetoothAdapter mBluetoothAdapter = null;
     // Member object for Bluetooth Command Service
     private BluetoothCommandService mCommandService = null;
+    private android.graphics.Point mResolution = new android.graphics.Point();
+
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -101,7 +103,7 @@ public class MainActivity extends Activity implements ColorBlobDetectionFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        getWindowManager().getDefaultDisplay().getSize(mResolution);
         Log.v("InitLog", "onCreate");
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -260,16 +262,12 @@ public class MainActivity extends Activity implements ColorBlobDetectionFragment
                 break;
         }
     }
-
-    public static int resolutionX = 1920;
-    public static int resolutionY = 768;
-
     @Override
     public void onCenterPoint(Optional<Point> center) {
         for (Point p : center.asSet()) {
             Log.v("CENTER", p.toString());
-            if (p.x < 0.4 * resolutionX) sendSpeedCommand(20, 40);
-            else if (p.x < 0.6 * resolutionX) sendSpeedCommand(30, 30);
+            if (p.x < 0.4 * mResolution.x) sendSpeedCommand(20, 40);
+            else if (p.x < 0.6 * mResolution.x) sendSpeedCommand(30, 30);
             else sendSpeedCommand(40, 20);
         }
     }
